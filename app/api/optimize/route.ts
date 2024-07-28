@@ -1,6 +1,7 @@
 import { getArtifacts, optimizeCrafts } from "./calc"
-
 import { NextRequest } from "next/server"
+
+export const dynamic = "force-dynamic"
 
 /**
  * Gets the inventory associated with an EID and returns the optimal
@@ -19,5 +20,3 @@ export async function GET(request: NextRequest) {
 
     return new Response("{}", { status: 200 })
 }
-
-export const dynamic = "force-dynamic"
