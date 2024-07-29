@@ -1,9 +1,16 @@
 "use client"
 
 import Script from "next/script"
-import { JSX, useState, useEffect } from "react"
+import React, { JSX, useState, useEffect } from "react"
 
-async function optimizeCrafts(highs: any) {
+interface Highs {
+    solve: (problem: string) => any,
+}
+
+async function optimizeCrafts(highs: Highs, eid: string) {
+    // Load artifact data
+    console.log(eid)
+
     console.log("optimizing")
     console.log(highs)
 
@@ -22,17 +29,43 @@ async function optimizeCrafts(highs: any) {
 }
 
 export default function Home(): JSX.Element {
-    const [ highs, setHighs ] = useState(null)
+    const [ highs, setHighs ] = useState<Highs | null>(null)
+    const [ eid, setEID ] = useState<string>("")
 
     // Load the highs solver on the client side
     useEffect(() => {
         async function loadHighs() {
-            const highs = await (window as any).Module()
+            const highs = await (window as any).Module() as Highs
             console.log("Loaded highs module")
             setHighs(highs)
         }
         loadHighs()
     }, [])
+
+    // Load the EID from localstorage
+    useEffect(() => {
+        if (window.localStorage["eid"]) {
+            setEID(window.localStorage["eid"])
+        }
+    }, [])
+
+    /**
+     * Set the input field value to the event value.
+     */
+    function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+        if ((event.nativeEvent as any).inputType === "insertFromPaste") {
+            return
+        }
+        setEID(event.target.value)
+    }
+
+    /**
+     * Save the EID in local storage and run the optimization.
+     */
+    function runOptimize() {
+        window.localStorage["eid"] = eid
+        optimizeCrafts(highs, eid)
+    }
 
     return (
         <>
@@ -40,8 +73,14 @@ export default function Home(): JSX.Element {
                 src="https://lovasoa.github.io/highs-js/highs.js"
                 strategy="beforeInteractive"
             ></Script>
-            {!highs ? "no highs" : "highs"}
-            <button onClick={() => optimizeCrafts(highs)}>Calculate</button>
+            Enter EID:
+            <input
+                type="text"
+                value={eid}
+                onChange={handleChange}
+                onPaste={event => setEID(event.clipboardData.getData("text"))}
+            ></input>
+            <button onClick={runOptimize}>Calculate</button>
         </>
     )
 }
