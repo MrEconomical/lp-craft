@@ -42,10 +42,12 @@ export async function GET(request: NextRequest): Promise<Response> {
 /**
  * Fetches and parses the artifact inventory associated with an EID.
  */
-export async function getInventory(eid: string): Promise<Inventory> {
+async function getInventory(eid: string): Promise<Inventory> {
     const INVENTORY_URL = "https://eggincdatacollection.azurewebsites.net/api/GetInventoryJson"
-    const artifacts = await fetch(`${INVENTORY_URL}?eid=${eid}`)
-        .then(response => response.json()) as Artifact[]
+    const artifacts = await fetch(
+        `${INVENTORY_URL}?eid=${eid}`,
+        { cache: "no-store" },
+    ).then(response => response.json()) as Artifact[]
 
     const inventory: Inventory = {}
     for (const artifact of artifacts) {
