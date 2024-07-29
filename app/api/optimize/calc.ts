@@ -1,4 +1,4 @@
-import { Recipes } from "../recipes/route"
+import { Recipes, NameTable } from "../recipes/route"
 
 interface Artifact {
     artifactType: {
@@ -18,7 +18,7 @@ export interface Inventory {
 }
 export interface Crafts {
     crafts: {
-        [artifact: number]: {
+        [artifact: string]: {
             count: number,
             xp: number,
         },
@@ -61,6 +61,7 @@ function hashArtifact(artifact: Artifact): number {
  */
 export function optimizeCrafts(
     recipes: Recipes,
+    names: NameTable,
     artifacts: Inventory,
 ): Crafts {
     return {} as Crafts
