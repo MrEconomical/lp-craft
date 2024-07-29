@@ -7,6 +7,9 @@ interface Highs {
     solve: (problem: string) => any,
 }
 
+/**
+ * Fetches artifact data and runs the linear program solver.
+ */
 async function optimizeCrafts(highs: Highs, eid: string) {
     // Load artifact data
     console.log(eid)
@@ -35,7 +38,9 @@ export default function Home(): JSX.Element {
     // Load the highs solver on the client side
     useEffect(() => {
         async function loadHighs() {
-            const highs = await (window as any).Module() as Highs
+            const highs = await (window as any).Module({
+                locateFile: file => `https://lovasoa.github.io/highs-js/${file}`,
+            }) as Highs
             console.log("Loaded highs module")
             setHighs(highs)
         }
@@ -69,10 +74,7 @@ export default function Home(): JSX.Element {
 
     return (
         <>
-            <Script
-                src="https://lovasoa.github.io/highs-js/highs.js"
-                strategy="beforeInteractive"
-            ></Script>
+            <Script src="/highs.js" strategy="beforeInteractive"></Script>
             Enter EID:
             <input
                 type="text"
