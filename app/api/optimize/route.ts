@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic"
  * Gets the inventory associated with an EID and returns the optimal
  * amount of each artifact to craft.
  */
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<Response> {
     // Get EID from request query
     const eid = request.nextUrl.searchParams.get("eid")
     if (!eid) {
