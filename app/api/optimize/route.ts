@@ -1,4 +1,4 @@
-import { getArtifacts, optimizeCrafts } from "./calc"
+import { Inventory, Crafts, getArtifacts, optimizeCrafts } from "./calc"
 import { NextRequest } from "next/server"
 
 export const dynamic = "force-dynamic"
@@ -16,7 +16,17 @@ export async function GET(request: NextRequest): Promise<Response> {
         }), { status: 400 })
     }
 
-    console.log(eid)
+    // Get artifact inventory
+    let inventory: Inventory
+    try {
+        inventory = await getArtifacts(eid)
+    } catch {
+        return new Response(JSON.stringify({
+            error: "unable to get artifact inventory",
+        }), { status: 500 })
+    }
+
+    console.log(inventory)
 
     return new Response("{}", { status: 200 })
 }

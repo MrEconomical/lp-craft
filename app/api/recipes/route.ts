@@ -88,5 +88,6 @@ function getArtifactTables(families: ArtifactFamily[]): {
  * Computes a unique numerical hash for an artifact.
  */
 function hashArtifact(artifact: BaseArtifact): number {
-    return artifact.afx_id * 4 + artifact.afx_level
+    const MAX_LEVEL = 3
+    return artifact.afx_id * (MAX_LEVEL + 1) + artifact.afx_level
 }
