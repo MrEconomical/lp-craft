@@ -12,10 +12,15 @@ interface Highs {
  */
 async function optimizeCrafts(highs: Highs, eid: string) {
     // Load artifact data
-    console.log(eid)
+    const [{ recipes, names }, inventory] = await Promise.all([
+        fetch("/api/recipes").then(response => response.json()),
+        fetch(`/api/inventory?eid=${eid}`).then(response => response.json()),
+    ])
 
     console.log("optimizing")
-    console.log(highs)
+    console.log(recipes)
+    console.log(names)
+    console.log(inventory)
 
     const PROBLEM = `Maximize
     obj:
