@@ -9,20 +9,21 @@ interface Artifact extends BaseArtifact {
     id: string,
     recipe: {
         ingredients: Ingredient[],
-    },
+    } | null,
+    crafting_xp: number,
 }
 interface ArtifactFamily {
     tiers: Artifact[],
 }
 
 export interface Recipes {
-    [key: number]: {
+    [artifact: number]: {
         ingredients: Record<number, number>,
         xp: number,
     } | null,
 }
 export interface NameTable {
-    [key: number]: string,
+    [artifact: number]: string,
 }
 
 export const revalidate = 3600 // 1 hour
@@ -43,12 +44,44 @@ export async function GET(): Promise<Response> {
         }), { status: 500 })
     }
 
-    console.log(families)
+    // Generate recipe and name tables
+    const { recipes, names } = getArtifactTables(families)
+    return new Response(
+        JSON.stringify({ recipes, names }),
+        { status: 200 },
+    )
+}
 
-    return new Response(JSON.stringify({
-        recipes: {},
-        names: {},
-    }), { status: 200 })
+/**
+ * Computes crafting recipe and artifact hash to name tables.
+ */
+function getArtifactTables(families: ArtifactFamily[]): {
+    recipes: Recipes,
+    names: NameTable,
+} {
+    const recipes: Recipes = {}
+    const names: NameTable = {}
+    const artifacts = families.flatMap(family => family.tiers)
+
+    for (const artifact of artifacts) {
+        const key = hashArtifact(artifact)
+        names[key] = artifact.id
+        if (!artifact.recipe) {
+            recipes[key] = null
+            continue
+        }
+
+        recipes[key] = {
+            ingredients: {},
+            xp: artifact.crafting_xp,
+        }
+        for (const ingredient of artifact.recipe.ingredients) {
+            const ingredientKey = hashArtifact(ingredient)
+            recipes[key].ingredients[ingredientKey] = ingredient.count
+        }
+    }
+
+    return { recipes, names }
 }
 
 /**

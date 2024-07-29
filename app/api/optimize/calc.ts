@@ -1,11 +1,11 @@
 import { Recipes } from "../recipes/route"
 
 export interface Inventory {
-    [key: number]: number,
+    [artifact: number]: number,
 }
 export interface Crafts {
     crafts: {
-        [key: number]: {
+        [artifact: number]: {
             count: number,
             xp: number,
         },
