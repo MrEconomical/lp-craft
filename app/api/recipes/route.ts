@@ -40,7 +40,7 @@ export async function GET(): Promise<Response> {
         families = recipes.artifact_families
     } catch {
         return new Response(JSON.stringify({
-            error: "unable to fetch recipes",
+            error: "unable to get recipes",
         }), { status: 500 })
     }
 

@@ -1,3 +1,4 @@
+import { Recipes, NameTable } from "../recipes/route"
 import { Inventory, Crafts, getArtifacts, optimizeCrafts } from "./calc"
 import { NextRequest } from "next/server"
 
@@ -16,6 +17,20 @@ export async function GET(request: NextRequest): Promise<Response> {
         }), { status: 400 })
     }
 
+    // Get recipe table
+    let recipes: Recipes
+    let names: NameTable
+    try {
+        const tables = await fetch(`${request.nextUrl.origin}/api/recipes`)
+            .then(response => response.json())
+        recipes = tables.recipes
+        names = tables.names
+    } catch(error) {
+        return new Response(JSON.stringify({
+            error: "unable to get recipes",
+        }), { status: 500 })
+    }
+
     // Get artifact inventory
     let inventory: Inventory
     try {
@@ -25,8 +40,6 @@ export async function GET(request: NextRequest): Promise<Response> {
             error: "unable to get artifact inventory",
         }), { status: 500 })
     }
-
-    console.log(inventory)
 
     return new Response("{}", { status: 200 })
 }
