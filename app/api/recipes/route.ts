@@ -26,7 +26,8 @@ export interface NameTable {
     [artifact: number]: string,
 }
 
-export const revalidate = 3600 // 1 hour
+// Enable caching with a 1 hour expiry
+export const revalidate = 3600
 
 /**
  * Fetches crafting recipes and constructs recipe and artifact hash tables.
