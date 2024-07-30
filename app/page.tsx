@@ -45,7 +45,7 @@ async function optimizeCrafts(highs: Highs, eid: string): Promise<Solution> {
     for (const artifact in solution.Columns) {
         result.crafts[artifact] = {
             count: solution.Columns[artifact].Primal,
-            xp: 0,
+            xp: 0, // TODO: fix
         }
     }
     console.log("Result:", result)
@@ -146,7 +146,7 @@ function getName(names: NameTable, id: string): string {
 export default function Home(): JSX.Element {
     const [ highs, setHighs ] = useState<Highs | null>(null)
     const [ eid, setEID ] = useState<string>("")
-    const [ output, setOutput ] = useState<string>("")
+    const [ solution, setSolution ] = useState<Solution | null>(null)
 
     // Load the highs solver on the client side
     useEffect(() => {
@@ -182,8 +182,8 @@ export default function Home(): JSX.Element {
      */
     async function runOptimize() {
         window.localStorage["eid"] = eid
-        const solution = await optimizeCrafts(highs, eid)
-        setOutput(JSON.stringify(solution, null, 4))
+        const result = await optimizeCrafts(highs, eid)
+        setSolution(result)
     }
 
     return (
@@ -197,8 +197,14 @@ export default function Home(): JSX.Element {
                 onPaste={event => setEID(event.clipboardData.getData("text"))}
             ></input>
             <button onClick={runOptimize}>Calculate</button>
-            <br></br>
-            {output}
+            {solution ? (
+                <>
+                    <div>Total XP: {solution.totalXp}</div>
+                    {Object.keys(solution.crafts).map(artifact => (
+                        <div>{artifact}: {solution.crafts[artifact].count}</div>
+                    ))}
+                </>
+            ) : (<></>)}
         </>
     )
 }
