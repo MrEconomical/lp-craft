@@ -60,8 +60,8 @@ function getArtifactTables(families: ArtifactFamily[]): {
     recipes: Recipes,
     names: NameTable,
 } {
-    const recipes: Recipes = {}
-    const names: NameTable = {}
+    const recipes = {} as Recipes
+    const names = {} as NameTable
     const artifacts = families.flatMap(family => family.tiers)
 
     for (const artifact of artifacts) {

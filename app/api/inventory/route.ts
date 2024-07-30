@@ -12,7 +12,7 @@ interface Artifact {
     }
     quantity: number,
 }
-interface Inventory {
+export interface Inventory {
     [artifact: number]: number,
 }
 
@@ -49,7 +49,7 @@ async function getInventory(eid: string): Promise<Inventory> {
         { cache: "no-store" },
     ).then(response => response.json()) as Artifact[]
 
-    const inventory: Inventory = {}
+    const inventory = {} as Inventory
     for (const artifact of artifacts) {
         if (artifact.artifactRarity.name != "COMMON") {
             continue

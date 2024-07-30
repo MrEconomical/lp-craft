@@ -1,5 +1,7 @@
 "use client"
 
+import { Inventory } from "./api/inventory/route"
+import { Recipes, NameTable } from "./api/recipes/route"
 import Script from "next/script"
 import React, { JSX, useState, useEffect } from "react"
 
@@ -13,8 +15,12 @@ interface Highs {
 async function optimizeCrafts(highs: Highs, eid: string) {
     // Load artifact data
     const [{ recipes, names }, inventory] = await Promise.all([
-        fetch("/api/recipes").then(response => response.json()),
-        fetch(`/api/inventory?eid=${eid}`).then(response => response.json()),
+        fetch("/api/recipes")
+            .then(response => response.json())
+            .then(data => data as { recipes: Recipes, names: NameTable }),
+        fetch(`/api/inventory?eid=${eid}`)
+            .then(response => response.json())
+            .then(data => data as Inventory),
     ])
 
     console.log("optimizing")
@@ -34,6 +40,13 @@ async function optimizeCrafts(highs: Highs, eid: string) {
     2 <= x4 <= 3
     End`
     console.log(highs.solve(PROBLEM))
+}
+
+/**
+ * Converts an artifact ID to a string name.
+ */
+function getName(names: NameTable, id: number): string {
+    return names[id].replaceAll("-", "_")
 }
 
 export default function Home(): JSX.Element {
