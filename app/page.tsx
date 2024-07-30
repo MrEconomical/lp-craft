@@ -8,13 +8,22 @@ import React, { JSX, useState, useEffect } from "react"
 interface Highs {
     solve: (problem: string) => any,
 }
+interface Solution {
+    crafts: {
+        [artifact: string]: {
+            count: number,
+            xp: number,
+        },
+    }
+    totalXp: number,
+}
 
 /**
  * Fetches artifact data and runs the linear program solver.
  */
-async function optimizeCrafts(highs: Highs, eid: string) {
+async function optimizeCrafts(highs: Highs, eid: string): Promise<Solution> {
     // Load artifact data
-    const [ { recipes, names }, inventory ] = await Promise.all([
+    const [{ recipes, names }, inventory] = await Promise.all([
         fetch("/api/recipes")
             .then(response => response.json())
             .then(data => data as { recipes: Recipes, names: NameTable }),
@@ -26,7 +35,22 @@ async function optimizeCrafts(highs: Highs, eid: string) {
     // Construct and solve optimization problem
     const problem = getProblem(recipes, names, inventory)
     console.log(problem)
-    console.log(highs.solve(problem))
+    const solution = highs.solve(problem)
+    console.log("Solution:", solution)
+
+    const result = {
+        crafts: {},
+        totalXp: solution.ObjectiveValue,
+    } as Solution
+    for (const artifact in solution.Columns) {
+        result.crafts[artifact] = {
+            count: solution.Columns[artifact].Primal,
+            xp: 0,
+        }
+    }
+    console.log("Result:", result)
+
+    return result
 }
 
 /**
@@ -122,6 +146,7 @@ function getName(names: NameTable, id: string): string {
 export default function Home(): JSX.Element {
     const [ highs, setHighs ] = useState<Highs | null>(null)
     const [ eid, setEID ] = useState<string>("")
+    const [ output, setOutput ] = useState<string>("")
 
     // Load the highs solver on the client side
     useEffect(() => {
@@ -155,9 +180,10 @@ export default function Home(): JSX.Element {
     /**
      * Save the EID in local storage and run the optimization.
      */
-    function runOptimize() {
+    async function runOptimize() {
         window.localStorage["eid"] = eid
-        optimizeCrafts(highs, eid)
+        const solution = await optimizeCrafts(highs, eid)
+        setOutput(JSON.stringify(solution, null, 4))
     }
 
     return (
@@ -171,6 +197,8 @@ export default function Home(): JSX.Element {
                 onPaste={event => setEID(event.clipboardData.getData("text"))}
             ></input>
             <button onClick={runOptimize}>Calculate</button>
+            <br></br>
+            {output}
         </>
     )
 }
