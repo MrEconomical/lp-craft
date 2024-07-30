@@ -24,7 +24,7 @@ async function optimizeCrafts(highs: Highs, eid: string) {
     ])
 
     // Construct and solve optimization problem
-    const problem = createProblem(recipes, names, inventory)
+    const problem = getProblem(recipes, names, inventory)
     console.log(problem)
     console.log(highs.solve(problem))
 }
@@ -32,7 +32,7 @@ async function optimizeCrafts(highs: Highs, eid: string) {
 /**
  * Generates a linear program problem in CPLEX format.
  */
-function createProblem(
+function getProblem(
     recipes: Recipes,
     names: NameTable,
     inventory: Inventory,
@@ -41,14 +41,23 @@ function createProblem(
     const artifacts = Object.keys(recipes)
     const artifactNames = artifacts.map(id => getName(names, id))
 
-    // Maximum XP objective
+    // Generate the maximum XP objective
     lines.push("Maximize")
-    lines.push(`  obj: ${createObjective(recipes, names)}`)
+    lines.push(`  obj: ${getObjective(recipes, names)}`)
+
+    // Add a resource constraint for each artifact
+    lines.push("Subject To")
+    for (const id of artifacts) {
+        const constraint = getConstraint(recipes, names, inventory, id)
+        if (constraint) {
+            lines.push(`  c${id}: ${constraint}`)
+        }
+    }
 
     // Restrict craft counts to positive numbers
     lines.push("Bounds")
     for (const artifact of artifactNames) {
-        lines.push(`  0 <= ${artifact}`)
+        lines.push(`  ${artifact} >= 0`)
     }
 
     // Specify all variables as integers
@@ -62,15 +71,45 @@ function createProblem(
 /**
  * Generates the XP maximization objective for a recipe list.
  */
-function createObjective(recipes: Recipes, names: NameTable): string {
+function getObjective(recipes: Recipes, names: NameTable): string {
     const crafts = []
-    for (const artifactId in recipes) {
-        if (!recipes[artifactId]) {
+    for (const id in recipes) {
+        if (!recipes[id]) {
             continue
         }
-        crafts.push(`${recipes[artifactId].xp} ${getName(names, artifactId)}`)
+        crafts.push(`${recipes[id].xp} ${getName(names, id)}`)
     }
     return crafts.join(" + ")
+}
+
+/**
+ * Generates a resource constraint inequality for an artifact. The total quantity
+ * used in each craft that uses the artifact must be bounded by the inventory count
+ * plus the number crafted.
+ */
+function getConstraint(
+    recipes: Recipes,
+    names: NameTable,
+    inventory: Inventory,
+    artifactId: string,
+): string | null {
+    const used = []
+    for (const id in recipes) {
+        if (!recipes[id] || !(artifactId in recipes[id].ingredients)) {
+            continue
+        }
+        used.push(`${recipes[id].ingredients[artifactId]} ${getName(names, id)}`)
+    }
+    if (used.length == 0) {
+        return null
+    }
+
+    const name = getName(names, artifactId)
+    const available = inventory[artifactId] || 0
+    if (recipes[artifactId]) {
+        return `${used.join(" + ")} - ${name} <= ${available}`
+    }
+    return `${used.join(" + ")} <= ${available}`
 }
 
 /**
