@@ -14,7 +14,7 @@ interface Highs {
  */
 async function optimizeCrafts(highs: Highs, eid: string) {
     // Load artifact data
-    const [{ recipes, names }, inventory] = await Promise.all([
+    const [ { recipes, names }, inventory ] = await Promise.all([
         fetch("/api/recipes")
             .then(response => response.json())
             .then(data => data as { recipes: Recipes, names: NameTable }),
@@ -23,29 +23,60 @@ async function optimizeCrafts(highs: Highs, eid: string) {
             .then(data => data as Inventory),
     ])
 
-    console.log("optimizing")
-    console.log(recipes)
-    console.log(names)
-    console.log(inventory)
+    // Construct and solve optimization problem
+    const problem = createProblem(recipes, names, inventory)
+    console.log(problem)
+    console.log(highs.solve(problem))
+}
 
-    const PROBLEM = `Maximize
-    obj:
-        x1 + 2 x2 + 4 x3 + x4
-    Subject To
-    c1: - x1 + x2 + x3 + 10 x4 <= 20
-    c2: x1 - 4 x2 + x3 <= 30
-    c3: x2 - 0.5 x4 = 0
-    Bounds
-    0 <= x1 <= 40
-    2 <= x4 <= 3
-    End`
-    console.log(highs.solve(PROBLEM))
+/**
+ * Generates a linear program problem in CPLEX format.
+ */
+function createProblem(
+    recipes: Recipes,
+    names: NameTable,
+    inventory: Inventory,
+): string {
+    const lines = []
+    const artifacts = Object.keys(recipes)
+    const artifactNames = artifacts.map(id => getName(names, id))
+
+    // Maximum XP objective
+    lines.push("Maximize")
+    lines.push(`  obj: ${createObjective(recipes, names)}`)
+
+    // Restrict craft counts to positive numbers
+    lines.push("Bounds")
+    for (const artifact of artifactNames) {
+        lines.push(`  0 <= ${artifact}`)
+    }
+
+    // Specify all variables as integers
+    lines.push("General")
+    lines.push(`  ${artifactNames.join(" ")}`)
+    lines.push("End")
+
+    return lines.join("\n")
+}
+
+/**
+ * Generates the XP maximization objective for a recipe list.
+ */
+function createObjective(recipes: Recipes, names: NameTable): string {
+    const crafts = []
+    for (const artifactId in recipes) {
+        if (!recipes[artifactId]) {
+            continue
+        }
+        crafts.push(`${recipes[artifactId].xp} ${getName(names, artifactId)}`)
+    }
+    return crafts.join(" + ")
 }
 
 /**
  * Converts an artifact ID to a string name.
  */
-function getName(names: NameTable, id: number): string {
+function getName(names: NameTable, id: string): string {
     return names[id].replaceAll("-", "_")
 }
 
