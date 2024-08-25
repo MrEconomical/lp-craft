@@ -1,3 +1,3 @@
-interface ArtifactNames {
+export interface ArtifactNames {
     [id: number]: string,
 }
