@@ -3,14 +3,16 @@
  * a mapping from hashed artifact IDs to readable string names.
  */
 
-import { ArtifactNames } from "../data/names"
-import { Recipes } from "../data/recipes"
-
 (async () => {
 
+// Get artifact crafting data from wasmegg GitHub
 const RECIPES_URL = "https://raw.githubusercontent.com/carpetsage/egg/main/wasmegg/_common/eiafx/eiafx-data.json"
+const recipeData = await fetch(RECIPES_URL).then(response => response.json())
+const artifacts = recipeData.artifact_families.flatMap(family => family.tiers)
 
-const recipes = {} as Recipes
-const names = {} as ArtifactNames
+console.log(artifacts)
+
+const recipes = {}
+const names = {}
 
 })()
