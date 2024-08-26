@@ -72,9 +72,9 @@ export default function Home(): JSX.Element {
             {solution ? (
                 <>
                     <div>Total XP: {solution.totalXp}</div>
-                    {Object.keys(solution.crafts).map(artifact => (
+                    {Object.keys(solution.crafts).sort().map(artifact => (
                         <div key={artifact}>
-                            {artifact}: {solution.crafts[artifact].count}
+                            {artifact}: {solution.crafts[artifact].count} ({solution.crafts[artifact].xp} xp)
                         </div>
                     ))}
                 </>

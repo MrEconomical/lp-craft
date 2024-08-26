@@ -29,7 +29,6 @@ export function optimizeCrafts(highs: Highs, inventory: Inventory): Solution {
         crafts: {},
         totalXp: 0,
     } as Solution
-
     for (const artifact in solution.Columns) {
         if (recipes[artifact]) {
             const count = solution.Columns[artifact].Primal
