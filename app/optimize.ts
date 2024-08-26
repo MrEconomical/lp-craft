@@ -1,12 +1,11 @@
+import { Inventory } from "./api/inventory/route"
 import { names } from "../data/names"
 import { recipes } from "../data/recipes"
 
-import { Inventory } from "./api/inventory/route"
-
-interface Highs {
+export interface Highs {
     solve: (problem: string) => any,
 }
-interface Solution {
+export interface Solution {
     crafts: {
         [artifact: string]: {
             count: number,
@@ -17,9 +16,17 @@ interface Solution {
 }
 
 /**
+ * Calculates the crafts to maximize XP given the artifacts in an inventory.
+ */
+export function optimizeCrafts(highs: Highs, inventory: Inventory): Solution {
+    const problem = getProblem(inventory)
+    return {} as Solution
+}
+
+/**
  * Generates a linear program problem in CPLEX format.
  */
-export function getProblem(inventory: Inventory): string {
+function getProblem(inventory: Inventory): string {
     console.log(names, recipes, inventory)
     return ""
 }

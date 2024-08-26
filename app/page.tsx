@@ -1,54 +1,18 @@
 "use client"
 
-import { getProblem } from "./optimize"
-
 import { Inventory } from "./api/inventory/route"
-import { Recipes, NameTable } from "./api/recipes/route"
+import { Highs, Solution, optimizeCrafts } from "./optimize"
 import Script from "next/script"
 import React, { JSX, useState, useEffect } from "react"
-
-interface Highs {
-    solve: (problem: string) => any,
-}
-interface Solution {
-    crafts: {
-        [artifact: string]: {
-            count: number,
-            xp: number,
-        },
-    }
-    totalXp: number,
-}
 
 /**
  * Fetches artifact data and runs the linear program solver.
  */
-async function optimizeCrafts(highs: Highs, eid: string): Promise<Solution> {
-    // Load artifact data
+async function getOptimalCrafts(highs: Highs, eid: string): Promise<Solution> {
     const inventory = await fetch(`/api/inventory?eid=${eid}`)
         .then(response => response.json())
         .then(data => data as Inventory)
-
-    // Construct and solve optimization problem
-    const problem = getProblem(inventory)
-    console.log(problem)
-    /*const solution = highs.solve(problem)
-    console.log("Solution:", solution)
-
-    const result = {
-        crafts: {},
-        totalXp: solution.ObjectiveValue,
-    } as Solution
-    for (const artifact in solution.Columns) {
-        result.crafts[artifact] = {
-            count: solution.Columns[artifact].Primal,
-            xp: 0, // TODO: fix
-        }
-    }
-    console.log("Result:", result)
-
-    return result*/
-    return {} as Solution
+    return optimizeCrafts(highs, inventory)
 }
 
 /**
@@ -143,9 +107,11 @@ function getConstraint(
 /**
  * Converts an artifact ID to a string name.
  */
+/*
 function getName(names: NameTable, id: string): string {
     return names[id].replaceAll("-", "_")
 }
+*/
 
 export default function Home(): JSX.Element {
     const [ highs, setHighs ] = useState<Highs | null>(null)
@@ -186,7 +152,7 @@ export default function Home(): JSX.Element {
      */
     async function runOptimize() {
         window.localStorage["eid"] = eid
-        const result = await optimizeCrafts(highs, eid)
+        const result = await getOptimalCrafts(highs, eid)
         //setSolution(result)
     }
 
