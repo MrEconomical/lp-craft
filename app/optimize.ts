@@ -29,6 +29,7 @@ export function optimizeCrafts(highs: Highs, inventory: Inventory): Solution {
         crafts: {},
         totalXp: 0,
     } as Solution
+
     for (const artifact in solution.Columns) {
         if (recipes[artifact]) {
             const count = solution.Columns[artifact].Primal
@@ -45,14 +46,17 @@ export function optimizeCrafts(highs: Highs, inventory: Inventory): Solution {
  * Generates a linear program problem in CPLEX format.
  */
 function getProblem(inventory: Inventory): string {
-    // Generate the maximum XP objective
+    // Sort artifacts for determinism
     const lines = []
+    const artifacts = Object.keys(recipes).sort()
+
+    // Generate the maximum XP objective
     lines.push("Maximize")
-    lines.push(`  obj: ${getObjective(recipes)}`)
+    lines.push(`  obj: ${getObjective(recipes, artifacts)}`)
 
     // Add a resource constraint for each artifact
     lines.push("Subject To")
-    for (const artifact in recipes) {
+    for (const artifact of artifacts) {
         const constraint = getConstraint(recipes, inventory, artifact)
         if (constraint) {
             lines.push(`  c_${artifact}: ${constraint}`)
@@ -61,13 +65,13 @@ function getProblem(inventory: Inventory): string {
 
     // Restrict craft counts to positive numbers
     lines.push("Bounds")
-    for (const artifact in recipes) {
+    for (const artifact of artifacts) {
         lines.push(`  ${artifact} >= 0`)
     }
 
     // Specify all variables as integers
     lines.push("General")
-    lines.push(`  ${Object.keys(recipes).join(" ")}`)
+    lines.push(`  ${artifacts.join(" ")}`)
     lines.push("End")
 
     return lines.join("\n")
@@ -76,9 +80,9 @@ function getProblem(inventory: Inventory): string {
 /**
  * Generates the XP maximization objective for a recipe list.
  */
-function getObjective(recipes: Recipes): string {
+function getObjective(recipes: Recipes, artifacts: string[]): string {
     const crafts = []
-    for (const artifact in recipes) {
+    for (const artifact of artifacts) {
         if (recipes[artifact]) {
             crafts.push(`${recipes[artifact].xp} ${artifact}`)
         }
