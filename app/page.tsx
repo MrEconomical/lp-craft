@@ -1,8 +1,8 @@
 "use client"
 
 import { Inventory } from "./api/inventory/route"
+import useHighs from "../hooks/use-highs"
 import { Highs, Solution, optimizeCrafts } from "../lib/optimize"
-import Script from "next/script"
 import React, { JSX, useState, useEffect } from "react"
 
 /**
@@ -16,21 +16,9 @@ async function getOptimalCrafts(highs: Highs, eid: string): Promise<Solution> {
 }
 
 export default function Home(): JSX.Element {
-    const [ highs, setHighs ] = useState<Highs | null>(null)
+    const highs = useHighs()
     const [ eid, setEID ] = useState<string>("")
     const [ solution, setSolution ] = useState<Solution | null>(null)
-
-    // Load the highs solver on the client side
-    useEffect(() => {
-        async function loadHighs() {
-            const highs = await (window as any).Module({
-                locateFile: file => `https://lovasoa.github.io/highs-js/${file}`,
-            }) as Highs
-            console.log("Loaded highs module")
-            setHighs(highs)
-        }
-        loadHighs()
-    }, [])
 
     // Load the EID from localstorage
     useEffect(() => {
@@ -53,6 +41,9 @@ export default function Home(): JSX.Element {
      * Save the EID in local storage and run the optimization.
      */
     async function runOptimize() {
+        if (!highs) {
+            return
+        }
         window.localStorage["eid"] = eid
         const result = await getOptimalCrafts(highs, eid)
         setSolution(result)

@@ -1,4 +1,4 @@
-import { Inventory } from "./api/inventory/route"
+import { Inventory } from "../app/api/inventory/route"
 import { Recipes, recipes } from "../data/recipes"
 
 export interface Highs {
@@ -46,7 +46,7 @@ export function optimizeCrafts(highs: Highs, inventory: Inventory): Solution {
  */
 function getProblem(inventory: Inventory): string {
     // Sort artifacts for determinism
-    const lines = []
+    const lines = [] as string[]
     const artifacts = Object.keys(recipes).sort()
 
     // Generate the maximum XP objective
@@ -80,7 +80,7 @@ function getProblem(inventory: Inventory): string {
  * Generates the XP maximization objective for a recipe list.
  */
 function getObjective(recipes: Recipes, artifacts: string[]): string {
-    const crafts = []
+    const crafts = [] as string[]
     for (const artifact of artifacts) {
         if (recipes[artifact]) {
             crafts.push(`${recipes[artifact].xp} ${artifact}`)
@@ -95,7 +95,7 @@ function getObjective(recipes: Recipes, artifacts: string[]): string {
  * plus the number crafted.
  */
 function getConstraint(recipes: Recipes, inventory: Inventory, artifact: string): string | null {
-    const used = []
+    const used = [] as string[]
     for (const parent in recipes) {
         if (recipes[parent] && artifact in recipes[parent].ingredients) {
             used.push(`${recipes[parent].ingredients[artifact]} ${parent}`)
