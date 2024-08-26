@@ -18,9 +18,27 @@ export interface Solution {
  * Calculates the crafts to maximize XP given the artifacts in an inventory.
  */
 export function optimizeCrafts(highs: Highs, inventory: Inventory): Solution {
+    // Run the highs solver on the LP problem
     const problem = getProblem(inventory)
     console.log(problem)
-    return {} as Solution
+    const solution = highs.solve(problem)
+    console.log("Solution:", solution)
+
+    // Store each craft and recompute the total XP
+    const result = {
+        crafts: {},
+        totalXp: 0,
+    } as Solution
+    for (const artifact in solution.Columns) {
+        if (recipes[artifact]) {
+            const count = solution.Columns[artifact].Primal
+            const xp = count * recipes[artifact].xp
+            result.crafts[artifact] = { count, xp }
+            result.totalXp += xp
+        }
+    }
+
+    return result
 }
 
 /**
