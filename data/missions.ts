@@ -5,5 +5,5 @@
 export interface Mission {
     ship: string,
     target: string | null,
-    dropRates: Record<string, number>,
+    rates: Record<string, number>,
 }
