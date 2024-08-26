@@ -1,5 +1,5 @@
 import { Highs } from "../lib/optimize"
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 
 /**
  * Loads the global highs solver after the page loads.
