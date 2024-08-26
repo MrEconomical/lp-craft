@@ -1,6 +1,5 @@
 import { Inventory } from "./api/inventory/route"
-import { names } from "../data/names"
-import { recipes } from "../data/recipes"
+import { Recipes, recipes } from "../data/recipes"
 
 export interface Highs {
     solve: (problem: string) => any,
@@ -20,6 +19,7 @@ export interface Solution {
  */
 export function optimizeCrafts(highs: Highs, inventory: Inventory): Solution {
     const problem = getProblem(inventory)
+    console.log(problem)
     return {} as Solution
 }
 
@@ -27,6 +27,26 @@ export function optimizeCrafts(highs: Highs, inventory: Inventory): Solution {
  * Generates a linear program problem in CPLEX format.
  */
 function getProblem(inventory: Inventory): string {
-    console.log(names, recipes, inventory)
-    return ""
+    const lines = []
+    const artifacts = Object.keys(recipes)
+
+    // Generate the maximum XP objective
+    lines.push("Maximize")
+    lines.push(`  obj: ${getObjective(recipes)}`)
+
+    return lines.join("\n")
+}
+
+/**
+ * Generates the XP maximization objective for a recipe list.
+ */
+function getObjective(recipes: Recipes): string {
+    const crafts = []
+    for (const artifact in recipes) {
+        if (!recipes[artifact]) {
+            continue
+        }
+        crafts.push(`${recipes[artifact].xp} ${artifact}`)
+    }
+    return crafts.join(" + ")
 }
