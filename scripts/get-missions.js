@@ -10,6 +10,7 @@ const fs = require("fs")
 const SHIP_NUM = 10
 const SHIP_DURATION = 2
 const SHIP_LEVEL = 5
+const SHIP_CAPACITY = 204
 const MIN_DROPS = 10000
 const BASE_NAME = "atreggies_extended"
 
@@ -54,7 +55,7 @@ for (const target of targets) {
         rates[name] = item.counts.reduce((a, b) => a + b)
     }
     for (const artifact in rates) {
-        rates[artifact] /= target.totalDrops
+        rates[artifact] = (rates[artifact] / target.totalDrops) * SHIP_CAPACITY
     }
 
     stats.push({
