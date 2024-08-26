@@ -1,5 +1,7 @@
 "use client"
 
+import { getProblem } from "./optimize"
+
 import { Inventory } from "./api/inventory/route"
 import { Recipes, NameTable } from "./api/recipes/route"
 import Script from "next/script"
@@ -23,19 +25,14 @@ interface Solution {
  */
 async function optimizeCrafts(highs: Highs, eid: string): Promise<Solution> {
     // Load artifact data
-    const [{ recipes, names }, inventory] = await Promise.all([
-        fetch("/api/recipes")
-            .then(response => response.json())
-            .then(data => data as { recipes: Recipes, names: NameTable }),
-        fetch(`/api/inventory?eid=${eid}`)
-            .then(response => response.json())
-            .then(data => data as Inventory),
-    ])
+    const inventory = await fetch(`/api/inventory?eid=${eid}`)
+        .then(response => response.json())
+        .then(data => data as Inventory)
 
     // Construct and solve optimization problem
-    const problem = getProblem(recipes, names, inventory)
+    const problem = getProblem(inventory)
     console.log(problem)
-    const solution = highs.solve(problem)
+    /*const solution = highs.solve(problem)
     console.log("Solution:", solution)
 
     const result = {
@@ -50,12 +47,14 @@ async function optimizeCrafts(highs: Highs, eid: string): Promise<Solution> {
     }
     console.log("Result:", result)
 
-    return result
+    return result*/
+    return {} as Solution
 }
 
 /**
  * Generates a linear program problem in CPLEX format.
  */
+/*
 function getProblem(
     recipes: Recipes,
     names: NameTable,
@@ -91,10 +90,12 @@ function getProblem(
 
     return lines.join("\n")
 }
+*/
 
 /**
  * Generates the XP maximization objective for a recipe list.
  */
+/*
 function getObjective(recipes: Recipes, names: NameTable): string {
     const crafts = []
     for (const id in recipes) {
@@ -105,12 +106,14 @@ function getObjective(recipes: Recipes, names: NameTable): string {
     }
     return crafts.join(" + ")
 }
+*/
 
 /**
  * Generates a resource constraint inequality for an artifact. The total quantity
  * used in each craft that uses the artifact must be bounded by the inventory count
  * plus the number crafted.
  */
+/*
 function getConstraint(
     recipes: Recipes,
     names: NameTable,
@@ -135,6 +138,7 @@ function getConstraint(
     }
     return `${used.join(" + ")} <= ${available}`
 }
+*/
 
 /**
  * Converts an artifact ID to a string name.
@@ -183,7 +187,7 @@ export default function Home(): JSX.Element {
     async function runOptimize() {
         window.localStorage["eid"] = eid
         const result = await optimizeCrafts(highs, eid)
-        setSolution(result)
+        //setSolution(result)
     }
 
     return (

@@ -1,19 +1,20 @@
+import { names } from "../../../data/names"
 import { NextRequest } from "next/server"
 
 interface Artifact {
     artifactType: {
         id: number,
-    }
+    },
     artifactRarity: {
         name: string,
-    }
+    },
     artifactLevel: {
         id: number,
-    }
+    },
     quantity: number,
 }
 export interface Inventory {
-    [artifact: number]: number,
+    [artifact: string]: number,
 }
 
 /**
@@ -55,7 +56,7 @@ async function getInventory(eid: string): Promise<Inventory> {
             continue
         }
         const key = hashArtifact(artifact)
-        inventory[key] = artifact.quantity
+        inventory[names[key]] = artifact.quantity
     }
 
     return inventory
