@@ -1,7 +1,7 @@
 "use client"
 
 import { Inventory } from "./api/inventory/route"
-import { Highs, Solution, optimizeCrafts } from "./optimize"
+import { Highs, Solution, optimizeCrafts } from "../lib/optimize"
 import Script from "next/script"
 import React, { JSX, useState, useEffect } from "react"
 
@@ -60,7 +60,6 @@ export default function Home(): JSX.Element {
 
     return (
         <>
-            <Script src="/highs.js" strategy="beforeInteractive"></Script>
             Enter EID:
             <input
                 type="text"

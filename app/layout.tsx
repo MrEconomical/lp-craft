@@ -1,4 +1,5 @@
 import { IBM_Plex_Mono } from "next/font/google"
+import Script from "next/script"
 import { JSX } from "react"
 
 export const metadata = {
@@ -19,7 +20,10 @@ export default function RootLayout({
 }): JSX.Element {
     return (
         <html lang="en">
-            <body className={font.className}>{children}</body>
+            <body className={font.className}>
+                <Script src="/highs.js" strategy="beforeInteractive"></Script>
+                {children}
+            </body>
         </html>
     )
 }
