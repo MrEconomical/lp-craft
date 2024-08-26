@@ -17,7 +17,7 @@ interface MissionStats {
  */
 function getMissionStats(highs: Highs, mission: Mission): MissionStats {
     // Construct inventory by multiplying rates
-    const NUM_SHIPS = 10000
+    const NUM_SHIPS = 20000
     const inventory = structuredClone(mission.rates)
     for (const artifact in inventory) {
         inventory[artifact] = Math.round(inventory[artifact] * NUM_SHIPS)
@@ -42,7 +42,7 @@ export default function Missions(): JSX.Element {
             return
         }
         const stats = missions.map(m => getMissionStats(highs, m))
-        stats.sort()
+        stats.sort((a, b) => b.xp - a.xp)
         setMissionStats(stats)
     }, [highs])
 
