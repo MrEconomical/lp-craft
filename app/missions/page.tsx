@@ -16,10 +16,19 @@ interface MissionStats {
  * crafting all the drops optimally.
  */
 function getMissionStats(highs: Highs, mission: Mission): MissionStats {
+    // Construct inventory by multiplying rates
+    const NUM_SHIPS = 10000
+    const inventory = structuredClone(mission.rates)
+    for (const artifact in inventory) {
+        inventory[artifact] = Math.round(inventory[artifact] * NUM_SHIPS)
+    }
+
+    // Calculate optimal XP
+    const solution = optimizeCrafts(highs, inventory)
     return {
         ship: mission.ship,
         target: mission.target || "none",
-        xp: 0,
+        xp: Math.round(solution.totalXp / NUM_SHIPS),
     }
 }
 
