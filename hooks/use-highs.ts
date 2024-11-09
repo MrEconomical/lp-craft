@@ -9,9 +9,7 @@ export default function useHighs(): Highs | null {
 
     useEffect(() => {
         async function loadHighs() {
-            const highs = await (window as any).Module({
-                locateFile: file => `https://lovasoa.github.io/highs-js/${file}`,
-            }) as Highs
+            const highs = await (window as any).Module({}) as Highs
             console.log("Loaded highs module")
             setHighs(highs)
         }
